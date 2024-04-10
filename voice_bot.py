@@ -9,6 +9,7 @@ from gtts import gTTS
 import io
 import time
 import threading
+import random
 
 lock = threading.Lock()
 
@@ -16,6 +17,7 @@ language = 'ru_RU'
 
 TOKEN = '6575996965:AAEHxx6jNmYvPOL-4S4NMXf7qBbwNOg087Q'
 bot = telebot.TeleBot(TOKEN)
+chat_group_id = '-1002041206537'
 
 sp_admins = [5473624098, 1342468201]
 sp_screen_dostup = [5473624098]
@@ -87,7 +89,105 @@ sp_flag = [' 🇷🇺', ' 🇺🇸', ' 🇿🇦', ' 🇦🇱', ' 🇪🇹', ' �
            ' 🇰🇪', ' 🇸🇪', ' 🇹🇯', ' 🇱🇰', ' 🇮🇳', ' 🇹🇭', ' 🇹🇷', ' 🇺🇦', ' 🇵🇰',
            ' 🇨🇳', ' 🇺🇿', ' 🇻🇳', ' 🏴', ' 🇿🇦', ' 🌐', ' 🇳🇬', ' 🇿🇦']
 
-dec = ['⭐️💠 ', ' 💠⭐️', '✅', '❌']
+dec = ['⭐️💠️ ', ' 💠️⭐️', '✅️ ', '❌️ ']
+
+morse_code_dict = {
+    'a': '.-',
+    'b': '-...',
+    'c': '-.-.',
+    'd': '-..',
+    'e': '.',
+    'f': '..-.',
+    'g': '--.',
+    'h': '....',
+    'i': '..',
+    'j': '.---',
+    'k': '-.-',
+    'l': '.-..',
+    'm': '--',
+    'n': '-.',
+    'o': '---',
+    'p': '.--.',
+    'q': '--.-',
+    'r': '.-.',
+    's': '...',
+    't': '-',
+    'u': '..-',
+    'v': '...-',
+    'w': '.--',
+    'x': '-..-',
+    'y': '-.--',
+    'z': '--..',
+    'а': '.-',
+    'б': '-...',
+    'в': '.--',
+    'г': '--.',
+    'д': '-..',
+    'е': '.',
+    'ж': '...-',
+    'з': '--..',
+    'и': '..',
+    'й': '.---',
+    'к': '-.-',
+    'л': '.-..',
+    'м': '--',
+    'н': '-.',
+    'о': '---',
+    'п': '.--.',
+    'р': '.-.',
+    'с': '...',
+    'т': '-',
+    'у': '..-',
+    'ф': '..-.',
+    'х': '....',
+    'ц': '-.-.',
+    'ч': '---.',
+    'ш': '----',
+    'щ': '--.-',
+    'ъ': '.--.-.',
+    'ы': '-.--',
+    'ь': '-..-',
+    'э': '..-..',
+    'ю': '..--',
+    'я': '.-.-',
+    '0': '-----',
+    '1': '.----',
+    '2': '..---',
+    '3': '...--',
+    '4': '....-',
+    '5': '.....',
+    '6': '-....',
+    '7': '--...',
+    '8': '---..',
+    '9': '----.',
+    '.': '.-.-.-',
+    ',': '--..--',
+    '?': '..--..',
+    "'": '.----.',
+    '!': '-.-.--',
+    '/': '-..-.',
+    '(': '-.--.',
+    ')': '-.--.-',
+    '&': '.-...',
+    ':': '---...',
+    ';': '-.-.-.',
+    '=': '-...-',
+    '+': '.-.-.',
+    '-': '-....-',
+    '_': '..--.-',
+    '"': '.-..-.',
+    '$': '...-..-',
+    '@': '.--.-.',
+    ' ': ' '
+}
+codecs = ["cp1252", "cp437", 'Latin-1', 'ISO-8859-1', 'Windows-1251', 'KOI8-R', 'CP437']
+
+
+def combine_mp3(sp, output_file):
+    with open(output_file, "wb") as output:
+        for file in sp:
+            with open(file, "rb") as file_2:
+                output.write(file_2.read())
 
 
 def recognise(filename):
@@ -112,6 +212,9 @@ def handle_docs_photo(message):
             bot.send_message(id_admin, f'<b>{dec[0]}✅{message.chat.id} @{message.chat.username}✅{dec[1]}</b>',
                              parse_mode='html')
             bot.send_photo(id_admin, open(f"images_pay/new_screen.png", 'rb'))
+        bot.send_message(chat_group_id, f'<b>{dec[0]}✅{message.chat.id} @{message.chat.username}✅{dec[1]}</b>',
+                         parse_mode='html')
+        bot.send_photo(chat_group_id, open(f"images_pay/new_screen.png", 'rb'))
 
         bot.send_message(message.chat.id,
                          f"<b>{dec[0]}✅Скриншот успешно отправлен, платеж будет зачислен в течение 24 часов✅{dec[1]}"
@@ -126,18 +229,18 @@ def ch(message):
         if len(message.text.split()) > 1:
             if message.text.split()[1] == 'info':
                 text = ''
-                for i in cursor.execute("SELECT * FROM oplata").fetchall():
+                for opl in cursor.execute("SELECT * FROM oplata").fetchall():
                     zn = ''
-                    if str(i[2]) == 'True':
+                    if str(opl[2]) == 'True':
                         zn += f'{dec[2]} '
                     else:
                         zn += ' ⌛'
-                    text += f'<b>{dec[0]}{i[0]} {i[1]} {zn} {i[3]}</b>\n'
+                    text += f'<b>{dec[0]}{opl[0]} {opl[1]} {zn} {opl[3]}</b>\n'
                 bot.send_message(message.chat.id, text, parse_mode='html')
             elif message.text.split()[1].isnumeric():
                 flag = False
-                for i in cursor.execute("SELECT number FROM oplata").fetchall():
-                    if str(i[0]) == str(message.text.split()[1]):
+                for opl_n in cursor.execute("SELECT number FROM oplata").fetchall():
+                    if str(opl_n[0]) == str(message.text.split()[1]):
                         flag = True
                         break
                 if len(message.text.split()) == 2:
@@ -295,7 +398,9 @@ def voice_processing(message):
                 cursor.execute("UPDATE users SET voice_text=? WHERE id=?", (str(text), (str(message.chat.id))))
                 connect.commit()
                 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                markup.add('/start', 'получить аудио')
+                markup.add('/start', '🔊 получить аудио 🔊')
+                markup.add('🔐 расшифровать 🔐', '🔒 зашифровать 🔒')
+                markup.add('🆘 Азбука Морзе 🆘 (невозможно прослушать на телефонах)')
                 n = 0
                 for _ in range(len(sp_language) // 2):
                     markup.add(f'{sp_flag[n]}{sp_language[n]}{sp_flag[n]}',
@@ -308,14 +413,17 @@ def voice_processing(message):
                 bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[2]} Вы можете перевести текст на другой язык!'
                                                   f' {dec[2]}{dec[1]}</b>',
                                  parse_mode='html', reply_markup=markup)
+                bot.send_message(chat_group_id, f'<b>{message.chat.id} @{message.from_user.username}\n'
+                                                f'{dec[0]}{dec[2]} {str(text)} {dec[2]}{dec[1]}</b>',
+                                 parse_mode='html')
                 print(message.chat.id, message.from_user.username, message.from_user.first_name, text)
-
             connect.close()
 
     except Exception as ex:
         print(ex.__class__.__name__)
         bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[3]}сообщение не распознано! ({str(ex.__class__.__name__)})'
                                           f'{dec[3]}{dec[1]}</b>', parse_mode='html')
+    print(message.voice.file_id)
 
 
 @bot.message_handler(commands=['start'])
@@ -324,8 +432,8 @@ def start(message):
     cursor = connect.cursor()
     try:
         avtorizacia = False
-        for i in cursor.execute("SELECT id FROM users").fetchall():
-            if str(i[0]) == str(message.chat.id):
+        for user in cursor.execute("SELECT id FROM users").fetchall():
+            if str(user[0]) == str(message.chat.id):
                 avtorizacia = True
                 break
         if not avtorizacia:
@@ -376,8 +484,8 @@ def al(message):
             connect = sqlite3.connect('voice_bd.sqlite', check_same_thread=False)
             cursor = connect.cursor()
             mess = f"<b>⚜️ {message.text.replace('/all', '')} ⚜️</b>"
-            for i in cursor.execute("SELECT id FROM users").fetchall():
-                print(i[0])
+            for user_all in cursor.execute("SELECT id FROM users").fetchall():
+                print(user_all[0])
                 bot.send_message(int(i[0]), mess, parse_mode='html')
             connect.close()
         else:
@@ -512,7 +620,8 @@ def ban(message):
 def help(message):
     sp_help = ['/start - перезапустить бота', '/help - вызвать это сообщение', '/i - информация об аккаунте',
                '/sub - информация  подписках', '/buy - купить подписку', '/id - посмотреть свой id',
-               '/ref_link_create - создать реферальную ссылку (подробнее /ref)', '/play - играть в мини-игры']
+               '/ref_link_create - создать реферальную ссылку (подробнее /ref)', '/play - играть в мини-игры',
+               f'{dec[3]}ВАЖНО: за спам или fake квитанции ваша подписка обнуляется!{dec[3]}']
     sp_help_admin = ['/ban - забрать подписку (обнуление VM и TIME)', '/info - инфо о боте']
     sp_help_creator = ['/users - просмотр всех пользователей', '/all - рассылка', '/check - управление чеками']
     text = ''
@@ -623,6 +732,24 @@ def get_text_messages(message):
     with lock:
         connect = sqlite3.connect('voice_bd.sqlite', check_same_thread=False)
         cursor = connect.cursor()
+        time_flag = True
+        vm = cursor.execute("SELECT VM FROM users WHERE id=?", (str(message.chat.id),)).fetchall()[0][0]
+        if str(cursor.execute("SELECT sub FROM users WHERE id=?", (str(message.chat.id),)).fetchall()[0][
+                   0]) == 'NO SUB':
+            date1 = 'подписка не активирована!'
+        else:
+            date = cursor.execute("SELECT TIME FROM users WHERE id=?", (str(message.chat.id),)).fetchall()[0][0]
+            dt = date.split()[0].split('-')
+            year, mounth, day = int(dt[0]), int(dt[1]), int(dt[2])
+            date = datetime.datetime(year, mounth, day)
+            date1 = date - datetime.datetime.now()
+            if date < datetime.datetime.now():
+                if int(vm) == 0:
+                    date1 = 'подписка не активирована!'
+                    cursor.execute("UPDATE users SET sub=? WHERE id=?", (str('NO SUB'), (str(message.chat.id))))
+                    connect.commit()
+                else:
+                    time_flag = False
         if message.text == f'{dec[0]}🗣 VM 🗣{dec[1]}':
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.add('/start')
@@ -653,13 +780,12 @@ def get_text_messages(message):
                     if i == 0:
                         if int(voice.split()[0]) <= sp_control[i]:
                             text += f'<b>{dec[0]} {voice.split()[0]} vm - {voice.split()[1]} монеток' \
-                                    f' ({int(voice.split()[1]) / int(voice.split()[0])} монет. за 1)</b>\n'
+                                    f' ({int(voice.split()[1]) / int(voice.split()[0])} монет. за 1 vm)</b>\n'
                     elif i > 0:
                         if sp_control[i - 1] < int(voice.split()[0]) <= sp_control[i]:
                             text += f'<b>{dec[0]} {voice.split()[0]} vm - {voice.split()[1]} монеток' \
-                                    f' ({int(voice.split()[1]) / int(voice.split()[0])} монет. за 1)</b>\n'
-                    sp_add.append(f'{dec[0]} {voice.split()[0]} vm {dec[1]}')
-            markup.add(*sp_add)
+                                    f' ({int(voice.split()[1]) / int(voice.split()[0])} монет. за 1 vm)</b>\n'
+            markup.add(*voice_sp_buy)
             bot.send_message(message.chat.id, text, parse_mode='html', reply_markup=markup)
         elif message.text == f'{dec[0]}👑 TIME 👑{dec[1]}':
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -694,10 +820,9 @@ def get_text_messages(message):
                     elif i > 0:
                         if sp_control[i - 1] < int(voice.split()[2]) <= sp_control[i]:
                             text += f'<b>{dec[0]} {" ".join(voice.split()[:2])} - {voice.split()[2]} монеток</b>\n'
-                    sp_add.append(f'{dec[0]} {" ".join(voice.split()[:2])} {dec[1]}')
-            markup.add(*sp_add)
+            markup.add(*time_sp_buy)
             bot.send_message(message.chat.id, text, parse_mode='html', reply_markup=markup)
-        elif message.text in voice_sp_buy or message.text in time_sp_buy:
+        elif (message.text in voice_sp_buy) or (message.text in time_sp_buy):
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.add('/start', 'Купить')
             cursor.execute("UPDATE users SET tovar=? WHERE id=?", (str(message.text), (str(message.chat.id))))
@@ -706,15 +831,18 @@ def get_text_messages(message):
             товар, без подтверждения оплаты (при наличии средств)❗️{dec[1]}</b>''', parse_mode='html',
                              reply_markup=markup)
         elif message.text == 'Купить':
-            tovar = str(cursor.execute('SELECT tovar FROM users WHERE id=?', (str(message.chat.id),)).fetchall()[0][0])
-            balance = str(cursor.execute('SELECT balance FROM users WHERE id=?', (str(message.chat.id),)).fetchall()[0][0])
+            tovar = str(cursor.execute('SELECT tovar FROM users WHERE id=?', (str(
+                message.chat.id),)).fetchall()[0][0])
+            balance = str(cursor.execute('SELECT balance FROM users WHERE id=?', (str(
+                message.chat.id),)).fetchall()[0][0])
             if int(balance) >= sl_buy[tovar]:
                 cursor.execute("UPDATE users SET balance=? WHERE id=?", (str(int(balance) - sl_buy[tovar]),
                                                                          (str(message.chat.id))))
                 connect.commit()
                 vm = cursor.execute("SELECT VM FROM users WHERE id=?", (str(message.chat.id),)).fetchall()[0][0]
                 if tovar in time_sp_buy:
-                    date = cursor.execute("SELECT TIME FROM users WHERE id=?", (str(message.chat.id),)).fetchall()[0][0]
+                    date = cursor.execute("SELECT TIME FROM users WHERE id=?", (str(
+                        message.chat.id),)).fetchall()[0][0]
                     dt = date.split()[0].split('-')
                     year, mounth, day = int(dt[0]), int(dt[1]), int(dt[2])
                     date = datetime.datetime(year, mounth, day)
@@ -731,42 +859,209 @@ def get_text_messages(message):
                 cursor.execute("UPDATE users SET sub=? WHERE id=?", (str('SUB'), (str(message.chat.id))))
                 connect.commit()
                 bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[2]} Вы приобрели {tovar} '
-                                                  f'за {sl_buy[tovar]} монеток! {dec[2]}{dec[1]}</b>', parse_mode='html')
+                                                  f'за {sl_buy[tovar]} монеток! {dec[2]}{dec[1]}</b>',
+                                 parse_mode='html')
             else:
                 bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[3]} У вас недостаточно средств!'
                                                   f'{dec[3]}{dec[1]}</b>', parse_mode='html')
-        elif message.text[2:-3] in sl_language:
-            text = cursor.execute("SELECT voice_text FROM users WHERE id=?", (str(message.chat.id),)).fetchall()[0][0]
-            translated = GoogleTranslator(source='auto', target=sl_language[message.text[2:-3]]).translate(str(text))
-            cursor.execute("UPDATE users SET language=? WHERE id=?", (str(sl_language[message.text[2:-3]]),
-                                                                      (str(message.chat.id))))
-            connect.commit()
-            bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[2]} {translated} {dec[2]}{dec[1]}</b>', parse_mode='html')
-        elif message.text == 'получить аудио':
-            try:
-                text = cursor.execute("SELECT voice_text FROM users WHERE id=?", (str(
-                    message.chat.id),)).fetchall()[0][0]
-                language = str(cursor.execute("SELECT language FROM users WHERE id=?", (str(
-                    message.chat.id),)).fetchall()[0][0])
-                translated = GoogleTranslator(source='auto', target=language).translate(str(text))
-                tts = gTTS(translated, lang=language)
-                voice_file = io.BytesIO()
-                tts.write_to_fp(voice_file)
-                voice_file.seek(0)
-                bot.send_voice(message.chat.id, voice_file)
-            except Exception as ex:
-                print(ex.__class__.__name__)
-                bot.send_message(message.chat.id,
-                                 f'<b>{dec[0]}{dec[3]}нельзя получить аудио на этом языке!'
-                                 f' ({str(ex.__class__.__name__)})'
-                                 f'{dec[3]}{dec[1]}</b>', parse_mode='html')
+        else:
+            if date1 == 'подписка не активирована!':
+                bot.send_message(message.chat.id, '❗️ <b>подписка не активирована! /sub /buy</b> ❗️',
+                                 parse_mode='html')
+            else:
+                if message.text[2:-3] in sl_language:
+                    text = cursor.execute("SELECT voice_text FROM users WHERE id=?", (str(message.chat.id),)).fetchall()[0][0]
+                    translated = GoogleTranslator(source='auto', target=sl_language[message.text[2:-3]]).translate(str(text))
+                    cursor.execute("UPDATE users SET language=? WHERE id=?", (str(sl_language[message.text[2:-3]]),
+                                                                              (str(message.chat.id))))
+                    connect.commit()
+                    bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[2]} {translated} {dec[2]}{dec[1]}</b>',
+                                     parse_mode='html')
+                    bot.send_message(chat_group_id, f'<b>{message.chat.id} @{message.from_user.username} {message.text}\n'
+                                                    f'{dec[0]}{dec[2]} {translated} {dec[2]}{dec[1]}</b>',
+                                     parse_mode='html')
+                elif message.text == '🔊 получить аудио 🔊':
+                    try:
+                        text = cursor.execute("SELECT voice_text FROM users WHERE id=?", (str(
+                            message.chat.id),)).fetchall()[0][0]
+                        language = str(cursor.execute("SELECT language FROM users WHERE id=?", (str(
+                            message.chat.id),)).fetchall()[0][0])
+                        print(language)
+                        if language == '🆘 Азбука Морзе 🆘':
+                            translated = GoogleTranslator(source='auto', target='ru').translate(str(text))
+                            files = []
+                            for znak in translated:
+                                if znak.lower() in morse_code_dict:
+                                    for j in morse_code_dict[znak.lower()]:
+                                        if j == '.':
+                                            files.append('audio/morse_dot.mp3')
+                                        elif j == '-':
+                                            files.append('audio/morse_tire.mp3')
+                                        elif j == '':
+                                            files.append('audio/spase.mp3')
+                            output_file = "audio/combined.mp3"
+                            combine_mp3(files, output_file)
+                            bot.send_audio(message.chat.id, open(f'{output_file}', 'rb'))
+                        else:
+                            translated = GoogleTranslator(source='auto', target=language).translate(str(text))
+                            tts = gTTS(translated, lang=language)
+                            voice_file = io.BytesIO()
+                            tts.write_to_fp(voice_file)
+                            voice_file.seek(0)
+                            bot.send_voice(message.chat.id, voice_file)
+                    except Exception as ex:
+                        print(ex.__class__.__name__)
+                        bot.send_message(message.chat.id,
+                                         f'<b>{dec[0]}{dec[3]}нельзя получить аудио на этом языке!'
+                                         f' ({str(ex.__class__.__name__)})'
+                                         f'{dec[3]}{dec[1]}</b>', parse_mode='html')
+                elif '🆘 Азбука Морзе 🆘' in message.text:
+                    text = cursor.execute("SELECT voice_text FROM users WHERE id=?", (str(
+                        message.chat.id),)).fetchall()[0][0]
+                    translated = GoogleTranslator(source='auto', target='ru').translate(str(text))
+                    cursor.execute("UPDATE users SET language=? WHERE id=?", (str(
+                        '🆘 Азбука Морзе 🆘'), (str(message.chat.id))))
+                    connect.commit()
+                    translated_sos = ''
+                    for znak in translated:
+                        if znak.lower() in morse_code_dict:
+                            translated_sos += morse_code_dict[znak.lower()]
+                    bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[2]} {translated_sos} {dec[2]}{dec[1]}</b>',
+                                     parse_mode='html')
+                    bot.send_message(chat_group_id, f'<b>{message.chat.id} @{message.from_user.username} {message.text}\n'
+                                                    f'{dec[0]}{dec[2]} {translated_sos} {dec[2]}{dec[1]}</b>',
+                                     parse_mode='html')
+                elif message.text == '🔒 зашифровать 🔒':
+                    text = cursor.execute("SELECT voice_text FROM users WHERE id=?", (str(
+                        message.chat.id),)).fetchall()[0][0]
+                    translated = GoogleTranslator(source='auto', target='ru').translate(str(text))
+                    with open("simple_text.txt", "w", encoding='utf-8') as file:
+                        file.write(translated)
+                        file.close()
+                    flag = True
+                    while flag:
+                        try:
+                            with open("simple_text.txt", "r", encoding=random.choice(codecs)) as file:
+                                text = file.read()
+                                bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[2]} {text} {dec[2]}{dec[1]}</b>',
+                                                 parse_mode='html')
+                                bot.send_message(chat_group_id,
+                                                 f'<b>{message.chat.id} @{message.from_user.username} {message.text}\n'
+                                                 f'{dec[0]}{dec[2]} {text} {dec[2]}{dec[1]}</b>',
+                                                 parse_mode='html')
+                                cursor.execute("UPDATE users SET shifr=? WHERE id=?",
+                                               (str(text), (str(message.chat.id))))
+                                connect.commit()
+                                flag = False
+                        except Exception as ex:
+                            print(ex.__class__.__name__)
+                            for codec in codecs:
+                                try:
+                                    with open("simple_text.txt", "r", encoding=codec) as file:
+                                        text = file.read()
+                                        bot.send_message(message.chat.id,
+                                                         f'<b>{dec[0]}{dec[2]} {text} {dec[2]}{dec[1]}</b>',
+                                                         parse_mode='html')
+                                        bot.send_message(chat_group_id,
+                                                         f'<b>{message.chat.id} @{message.from_user.username}'
+                                                         f' {message.text}\n'
+                                                         f'{dec[0]}{dec[2]} {text} {dec[2]}{dec[1]}</b>',
+                                                         parse_mode='html')
+                                        cursor.execute("UPDATE users SET shifr=? WHERE id=?",
+                                                       (str(text), (str(message.chat.id))))
+                                        connect.commit()
+                                        flag = False
+                                        break
+                                except Exception as ex:
+                                    print(ex.__class__.__name__)
+                            if flag:
+                                bot.send_message(message.chat.id,
+                                                 f'<b>{dec[0]}{dec[3]} Сообщение невозможно зашифровать! '
+                                                 f'({str(ex.__class__.__name__)})'
+                                                 f'{dec[3]}{dec[1]}</b>', parse_mode='html')
+                elif message.text == '🔐 расшифровать 🔐':
+                    text = cursor.execute("SELECT voice_text FROM users WHERE id=?", (str(
+                        message.chat.id),)).fetchall()[0][0]
+                    flag = True
+                    for codec in codecs:
+                        try:
+                            text = text.encode(codec).decode('UTF-8')
+                            bot.send_message(message.chat.id,
+                                             f'<b>{dec[0]}{dec[2]} {text} {dec[2]}{dec[1]}</b>',
+                                             parse_mode='html')
+                            bot.send_message(chat_group_id,
+                                             f'<b>{message.chat.id} @{message.from_user.username}'
+                                             f' {message.text}\n'
+                                             f'{dec[0]}{dec[2]} {text} {dec[2]}{dec[1]}</b>',
+                                             parse_mode='html')
+                            cursor.execute("UPDATE users SET voice_text=? WHERE id=?",
+                                           (str(text), (str(message.chat.id))))
+                            connect.commit()
+                            flag = False
+                            break
+                        except Exception as ex:
+                            print(ex.__class__.__name__)
+                    if flag:
+                        text = cursor.execute("SELECT shifr FROM users WHERE id=?", (str(
+                            message.chat.id),)).fetchall()[0][0]
+                        flag = True
+                        for codec in codecs:
+                            try:
+                                text = text.encode(codec).decode('UTF-8')
+                                bot.send_message(message.chat.id,
+                                                 f'<b>{dec[0]}{dec[2]} {text} {dec[2]}{dec[1]}</b>',
+                                                 parse_mode='html')
+                                bot.send_message(chat_group_id,
+                                                 f'<b>{message.chat.id} @{message.from_user.username}'
+                                                 f' {message.text}\n'
+                                                 f'{dec[0]}{dec[2]} {text} {dec[2]}{dec[1]}</b>',
+                                                 parse_mode='html')
+                                cursor.execute("UPDATE users SET shifr=? WHERE id=?",
+                                               (str(text), (str(message.chat.id))))
+                                connect.commit()
+                                flag = False
+                                break
+                            except Exception as ex:
+                                print(ex.__class__.__name__)
+                        if flag:
+                            bot.send_message(message.chat.id,
+                                             f'<b>{dec[0]}{dec[3]} Сообщение невозможно зашифровать! '
+                                             f'({str(ex.__class__.__name__)})'
+                                             f'{dec[3]}{dec[1]}</b>', parse_mode='html')
+                else:
+                    text = message.text
+                    if not time_flag:
+                        cursor.execute("UPDATE users SET VM=? WHERE id=?", (str(int(vm - 1)), (str(message.chat.id))))
+                        connect.commit()
+                    cursor.execute("UPDATE users SET voice_text=? WHERE id=?", (str(text), (str(message.chat.id))))
+                    connect.commit()
+                    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                    markup.add('/start', '🔊 получить аудио 🔊')
+                    markup.add('🔐 расшифровать 🔐', '🔒 зашифровать 🔒')
+                    markup.add('🆘 Азбука Морзе 🆘 (невозможно прослушать на телефонах)')
+                    n = 0
+                    for _ in range(len(sp_language) // 2):
+                        markup.add(f'{sp_flag[n]}{sp_language[n]}{sp_flag[n]}',
+                                   f'{sp_flag[n + 1]}{sp_language[n + 1]}{sp_flag[n + 1]}')
+                        n += 2
+                    if len(sp_language) % 2 == 1:
+                        markup.add(f'{dec[0]}{sp_flag[n]}{sp_language[-1]}{sp_flag[n]}{dec[1]}')
+                    bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[2]} {str(text)} {dec[2]}{dec[1]}</b>',
+                                     parse_mode='html')
+                    bot.send_message(message.chat.id, f'<b>{dec[0]}{dec[2]} Вы можете перевести текст на другой язык!'
+                                                      f' {dec[2]}{dec[1]}</b>',
+                                     parse_mode='html', reply_markup=markup)
+                    bot.send_message(chat_group_id, f'<b>{message.chat.id} @{message.from_user.username}\n'
+                                                    f'{dec[0]}{dec[2]} {str(text)} {dec[2]}{dec[1]}</b>',
+                                     parse_mode='html')
+                    print(message.chat.id, message.from_user.username, message.from_user.first_name, text)
         connect.close()
-        print(message.chat.id, message.chat.username, message.text)
+        print(datetime.datetime.now(), message.chat.id, message.chat.username, message.text)
 
 
 while True:
     try:
-        bot.polling(none_stop=True, timeout=90)
+        bot.polling(none_stop=True, timeout=600)
     except Exception as e:
         print(datetime.datetime.now(), e)
         time.sleep(5)
