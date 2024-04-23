@@ -1,0 +1,6 @@
+deep_translator==1.11.4
+gTTS==2.5.1
+pyTelegramBotAPI==4.17.0
+soundfile==0.12.1
+SpeechRecognition==3.10.3
+telebot==0.0.5
